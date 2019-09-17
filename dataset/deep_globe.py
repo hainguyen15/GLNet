@@ -60,7 +60,7 @@ def classToRGB(label):
     colmap[indices[0].tolist(), indices[1].tolist(), :] = [255, 255, 255]
     indices = np.where(label == 0)
     colmap[indices[0].tolist(), indices[1].tolist(), :] = [0, 0, 0]
-    transform = ToTensor();
+    transform = ToTensor()
     #     plt.imshow(colmap)
     #     plt.show()
     return transform(colmap)
@@ -102,14 +102,14 @@ class DeepGlobe(data.Dataset):
         self.transform = transform
         self.ids = ids
         self.classdict = {1: "urban", 2: "agriculture", 3: "rangeland", 4: "forest", 5: "water", 6: "barren", 0: "unknown"}
-        
+
         self.color_jitter = transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.04)
         self.resizer = transforms.Resize((2448, 2448))
 
     def __getitem__(self, index):
         sample = {}
         sample['id'] = self.ids[index][:-8]
-        image = Image.open(os.path.join(self.root, "Sat/" + self.ids[index])) # w, h
+        image = Image.open(os.path.join(self.root, "Sat/" + self.ids[index]))  # w, h
         sample['image'] = image
         # sample['image'] = transforms.functional.adjust_contrast(image, 1.4)
         if self.label:
@@ -154,9 +154,7 @@ class DeepGlobe(data.Dataset):
         #     j = int(np.floor(np.random.random() * (2448 - w)))
         #     image = self.resizer(transforms.functional.crop(image, i, j, h, w))
         #     label = self.resizer(transforms.functional.crop(label, i, j, h, w))
-        
         return image, label
-
 
     def __len__(self):
         return len(self.ids)

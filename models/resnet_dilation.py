@@ -29,6 +29,7 @@ class BasicBlock(nn.Module):
     """ResNet BasicBlock
     """
     expansion = 1
+
     def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, previous_dilation=1,
                  norm_layer=None):
         super(BasicBlock, self).__init__()
@@ -66,6 +67,7 @@ class Bottleneck(nn.Module):
     """
     # pylint: disable=unused-argument
     expansion = 4
+
     def __init__(self, inplanes, planes, stride=1, dilation=1,
                  downsample=None, previous_dilation=1, norm_layer=None):
         super(Bottleneck, self).__init__()
@@ -133,13 +135,14 @@ class ResNet(nn.Module):
 
     Reference:
 
-        - He, Kaiming, et al. "Deep residual learning for image recognition." Proceedings of the IEEE conference on computer vision and pattern recognition. 2016.
+        - He, Kaiming, et al. "Deep residual learning for image recognition." Proceedings of the IEEE conference on
+        computer vision and pattern recognition. 2016.
 
         - Yu, Fisher, and Vladlen Koltun. "Multi-scale context aggregation by dilated convolutions."
     """
     # pylint: disable=unused-variable
     def __init__(self, block, layers, num_classes=1000, dilated=True, norm_layer=nn.BatchNorm2d, multi_grid=True, multi_dilation=(1, 2, 3)):
-        self.inplanes = 128 # 64
+        self.inplanes = 128  # 64
         super(ResNet, self).__init__()
         # self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.conv1 = nn.Sequential(
@@ -158,16 +161,13 @@ class ResNet(nn.Module):
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2, norm_layer=norm_layer)
         if dilated:
             if multi_grid:
-                self.layer3 = self._make_layer(block,256,layers[2],stride=1,
+                self.layer3 = self._make_layer(block, 256, layers[2], stride=1,
                                                dilation=2, norm_layer=norm_layer)
-                self.layer4 = self._make_layer(block,512,layers[3],stride=1,
-                                               dilation=4, norm_layer=norm_layer,
+                self.layer4 = self._make_layer(block, 512, layers[3], stride=1, dilation=4, norm_layer=norm_layer,
                                                multi_grid=multi_grid, multi_dilation=multi_dilation)
             else:
-                self.layer3 = self._make_layer(block, 256, layers[2], stride=1,
-                                           dilation=2, norm_layer=norm_layer)
-                self.layer4 = self._make_layer(block, 512, layers[3], stride=1,
-                                           dilation=4, norm_layer=norm_layer)
+                self.layer3 = self._make_layer(block, 256, layers[2], stride=1, dilation=2, norm_layer=norm_layer)
+                self.layer4 = self._make_layer(block, 512, layers[3], stride=1, dilation=4, norm_layer=norm_layer)
         else:
             self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
                                            norm_layer=norm_layer)
@@ -194,13 +194,13 @@ class ResNet(nn.Module):
             )
 
         layers = []
-        if multi_grid == False:
+        if not multi_grid:
             if dilation == 1 or dilation == 2:
                 layers.append(block(self.inplanes, planes, stride, dilation=1,
-                                downsample=downsample, previous_dilation=dilation, norm_layer=norm_layer))
+                                    downsample=downsample, previous_dilation=dilation, norm_layer=norm_layer))
             elif dilation == 4:
                 layers.append(block(self.inplanes, planes, stride, dilation=2,
-                                downsample=downsample, previous_dilation=dilation, norm_layer=norm_layer))
+                                    downsample=downsample, previous_dilation=dilation, norm_layer=norm_layer))
             else:
                 raise RuntimeError("=> unknown dilation size: {}".format(dilation))
         else:
@@ -209,13 +209,13 @@ class ResNet(nn.Module):
         self.inplanes = planes * block.expansion
         if multi_grid:
             div = len(multi_dilation)
-            for i in range(1,blocks):
-                layers.append(block(self.inplanes, planes, dilation=multi_dilation[i%div], previous_dilation=dilation,
-                                                    norm_layer=norm_layer))
+            for i in range(1, blocks):
+                layers.append(block(self.inplanes, planes, dilation=multi_dilation[i % div],
+                                    previous_dilation=dilation, norm_layer=norm_layer))
         else:
             for i in range(1, blocks):
                 layers.append(block(self.inplanes, planes, dilation=dilation, previous_dilation=dilation,
-                                norm_layer=norm_layer))
+                                    norm_layer=norm_layer))
 
         return nn.Sequential(*layers)
 
@@ -281,12 +281,11 @@ def resnet101(pretrained=False, root='./pretrain_models', **kwargs):
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
     model = ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
-    #Remove the following lines of comments
-    #if u want to train from a pretrained model
+    # Remove the following lines of comments
+    # if u want to train from a pretrained model
     if pretrained:
-       # from ..models.model_store import get_model_file
-       model.load_state_dict(torch.load(
-           get_model_file('resnet101', root=root)), strict=False)
+        # from ..models.model_store import get_model_file
+        model.load_state_dict(torch.load(get_model_file('resnet101', root=root)), strict=False)
     return model
 
 
@@ -298,7 +297,6 @@ def resnet152(pretrained=False, root='~/.encoding/models', **kwargs):
     """
     model = ResNet(Bottleneck, [3, 8, 36, 3], **kwargs)
     if pretrained:
-       # model.load_state_dict(model_zoo.load_url(model_urls['resnet152']))
-        model.load_state_dict(torch.load(
-            './pretrain_models/resnet152-b121ed2d.pth'), strict=False)
+        # model.load_state_dict(model_zoo.load_url(model_urls['resnet152']))
+        model.load_state_dict(torch.load('./pretrain_models/resnet152-b121ed2d.pth'), strict=False)
     return model

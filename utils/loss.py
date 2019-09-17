@@ -25,13 +25,12 @@ def one_hot(index, classes):
     # mask = torch.Tensor(size).fill_(0).to(device)
     mask = torch.Tensor(size).fill_(0).cuda()
     index = index.view(view)
-    ones = 1.
+    ones = 1.0
 
     return mask.scatter_(1, index, ones)
 
 
 class FocalLoss(nn.Module):
-
     def __init__(self, gamma=0, eps=1e-7, size_average=True, one_hot=True, ignore=None):
         super(FocalLoss, self).__init__()
         self.gamma = gamma
@@ -41,21 +40,24 @@ class FocalLoss(nn.Module):
         self.ignore = ignore
 
     def forward(self, input, target):
-        '''
+        """
         only support ignore at 0
-        '''
-        B, C, H, W = input.size()
-        input = input.permute(0, 2, 3, 1).contiguous().view(-1, C)  # B * H * W, C = P, C
+        """
+        _, C, _, _ = input.size()
+        input = (
+            input.permute(0, 2, 3, 1).contiguous().view(-1, C)
+        )  # B * H * W, C = P, C
         target = target.view(-1)
         if self.ignore is not None:
-            valid = (target != self.ignore)
+            valid = target != self.ignore
             input = input[valid]
             target = target[valid]
 
-        if self.one_hot: target = one_hot(target, input.size(1))
+        if self.one_hot:
+            target = one_hot(target, input.size(1))
         probs = F.softmax(input, dim=1)
         probs = (probs * target).sum(1)
-        probs = probs.clamp(self.eps, 1. - self.eps)
+        probs = probs.clamp(self.eps, 1.0 - self.eps)
 
         log_p = probs.log()
         # print('probs size= {}'.format(probs.size()))
@@ -80,6 +82,7 @@ class SoftCrossEntropyLoss2d(nn.Module):
         loss = 0
         inputs = -F.log_softmax(inputs, dim=1)
         for index in range(inputs.size()[0]):
-            loss += F.conv2d(inputs[range(index, index+1)], targets[range(index, index+1)])/(targets.size()[2] *
-                                                                                             targets.size()[3])
+            loss += F.conv2d(
+                inputs[range(index, index + 1)], targets[range(index, index + 1)]
+            ) / (targets.size()[2] * targets.size()[3])
         return loss
