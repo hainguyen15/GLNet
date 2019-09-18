@@ -1,10 +1,12 @@
 import os
+
 # from os.path import join
+import random
 import torch.utils.data as data
 import numpy as np
+
 # import matplotlib.pyplot as plt
 from PIL import Image, ImageFile
-import random
 from torchvision.transforms import ToTensor
 from torchvision import transforms
 import cv2
@@ -17,7 +19,7 @@ def is_image_file(filename):
 
 
 def find_label_map_name(img_filenames, labelExtension=".png"):
-    img_filenames = img_filenames.replace('_sat.jpg', '_mask')
+    img_filenames = img_filenames.replace("_sat.jpg", "_mask")
     return img_filenames + labelExtension
 
 
@@ -82,7 +84,9 @@ def label_bluring(inputs):
     outputs = np.ones((batchSize, numClass, height, width), dtype=np.float)
     for batchCnt in range(batchSize):
         for index in range(numClass):
-            outputs[batchCnt, index, ...] = cv2.GaussianBlur(inputs[batchCnt, index, ...].astype(np.float), (7, 7), 0)
+            outputs[batchCnt, index, ...] = cv2.GaussianBlur(
+                inputs[batchCnt, index, ...].astype(np.float), (7, 7), 0
+            )
     return outputs
 
 
@@ -101,26 +105,41 @@ class DeepGlobe(data.Dataset):
         self.label = label
         self.transform = transform
         self.ids = ids
-        self.classdict = {1: "urban", 2: "agriculture", 3: "rangeland", 4: "forest", 5: "water", 6: "barren", 0: "unknown"}
+        self.classdict = {
+            1: "urban",
+            2: "agriculture",
+            3: "rangeland",
+            4: "forest",
+            5: "water",
+            6: "barren",
+            0: "unknown",
+        }
 
-        self.color_jitter = transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.04)
+        self.color_jitter = transforms.ColorJitter(
+            brightness=0.3, contrast=0.3, saturation=0.3, hue=0.04
+        )
         self.resizer = transforms.Resize((2448, 2448))
 
     def __getitem__(self, index):
         sample = {}
-        sample['id'] = self.ids[index][:-8]
+        sample["id"] = self.ids[index][:-8]
         image = Image.open(os.path.join(self.root, "Sat/" + self.ids[index]))  # w, h
-        sample['image'] = image
+        sample["image"] = image
         # sample['image'] = transforms.functional.adjust_contrast(image, 1.4)
         if self.label:
             # label = scipy.io.loadmat(join(self.root, 'Notification/' + self.ids[index].replace('_sat.jpg', '_mask.mat')))["label"]
             # label = Image.fromarray(label)
-            label = Image.open(os.path.join(self.root, 'Label/' + self.ids[index].replace('_sat.jpg', '_mask.png')))
-            sample['label'] = label
+            label = Image.open(
+                os.path.join(
+                    self.root,
+                    "Label/" + self.ids[index].replace("_sat.jpg", "_mask.png"),
+                )
+            )
+            sample["label"] = label
         if self.transform and self.label:
             image, label = self._transform(image, label)
-            sample['image'] = image
-            sample['label'] = label
+            sample["image"] = image
+            sample["label"] = label
         # return {'image': image.astype(np.float32), 'label': label.astype(np.int64)}
         return sample
 

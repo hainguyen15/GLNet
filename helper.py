@@ -430,16 +430,16 @@ class Trainer(object):
             outputs_global = [None for i in range(len(images))]
 
         if self.mode == 1:
-            # training with only (resized) global image #########################################
+            # training with only (resized) global image 
             outputs_global, _ = model.forward(images_glb, None, None, None)
             loss = self.criterion(outputs_global, labels_glb)
             loss.backward()
             self.optimizer.step()
             self.optimizer.zero_grad()
-            ##############################################
+            
 
         if self.mode == 2:
-            # training with patches ###########################################
+            # training with patches 
             for i in range(len(images)):
                 j = 0
                 # while j < self.n**2:
@@ -491,10 +491,10 @@ class Trainer(object):
 
             self.optimizer.step()
             self.optimizer.zero_grad()
-            #####################################################################################
+            
 
         if self.mode == 3:
-            # train global with help from patches ##################################################
+            # train global with help from patches 
             # go through local patches to collect feature maps
             # collect predictions from patches
             for i in range(len(images)):
@@ -575,7 +575,7 @@ class Trainer(object):
             self.optimizer.step()
             self.optimizer.zero_grad()
 
-        # global predictions ###########################
+        # global predictions 
         # predictions_global = F.interpolate(outputs_global.cpu(), self.size0, mode='nearest').argmax(1).detach().numpy()
         outputs_global = outputs_global.cpu()
         predictions_global = [
@@ -590,7 +590,7 @@ class Trainer(object):
         self.metrics_global.update(labels_npy, predictions_global)
 
         if self.mode == 2 or self.mode == 3:
-            # patch predictions ###########################
+            # patch predictions 
             # scores_local = np.array(patch2global(predicted_patches, self.n_class, self.n, self.step, self.size0, self.size_p, len(images))) # merge softmax scores from patches (overlaps)
             scores_local = np.array(
                 patch2global(
@@ -599,8 +599,8 @@ class Trainer(object):
             )  # merge softmax scores from patches (overlaps)
             predictions_local = scores_local.argmax(1)  # b, h, w
             self.metrics_local.update(labels_npy, predictions_local)
-            ###################################################
-            # combined/ensemble predictions ###########################
+            
+            # combined/ensemble predictions 
             # scores = np.array(patch2global(predicted_ensembles, self.n_class, self.n, self.step, self.size0, self.size_p, len(images))) # merge softmax scores from patches (overlaps)
             scores = np.array(
                 patch2global(
@@ -735,7 +735,7 @@ class Evaluator(object):
                         ]
 
                     if self.mode == 1:
-                        # eval with only resized global image ##########################
+                        # eval with only resized global image 
                         if flip:
                             outputs_global += np.flip(
                                 np.rot90(
@@ -755,10 +755,9 @@ class Evaluator(object):
                                 k=angle,
                                 axes=(3, 2),
                             )
-                        ################################################################
 
                     if self.mode == 2:
-                        # eval with patches ###########################################
+                        # eval with patches 
                         for i in range(len(images)):
                             j = 0
                             # while j < self.n**2:
@@ -875,10 +874,9 @@ class Evaluator(object):
                                     k=angle,
                                     axes=(3, 2),
                                 )  # merge softmax scores from patches (overlaps)
-                        ###############################################################
 
                     if self.mode == 3:
-                        # eval global with help from patches ##################################################
+                        # eval global with help from patches 
                         # go through local patches to collect feature maps
                         # collect predictions from patches
                         for i in range(len(images)):
@@ -1024,9 +1022,8 @@ class Evaluator(object):
                                     k=angle,
                                     axes=(3, 2),
                                 )  # merge softmax scores from patches (overlaps)
-                        ###################################################
 
-            # global predictions ###########################
+            # global predictions 
             # predictions_global = F.interpolate(torch.Tensor(outputs_global), self.size0, mode='nearest').argmax(1).detach().numpy()
             outputs_global = torch.Tensor(outputs_global)
             predictions_global = [
@@ -1042,13 +1039,13 @@ class Evaluator(object):
                 self.metrics_global.update(labels_npy, predictions_global)
 
             if self.mode == 2 or self.mode == 3:
-                # patch predictions ###########################
+                # patch predictions 
                 # predictions_local = scores_local.argmax(1) # b, h, w
                 predictions_local = [score.argmax(1)[0] for score in scores_local]
                 if not self.test:
                     self.metrics_local.update(labels_npy, predictions_local)
-                ###################################################
-                # combined/ensemble predictions ###########################
+                
+                # combined/ensemble predictions 
                 # predictions = scores.argmax(1) # b, h, w
                 predictions = [score.argmax(1)[0] for score in scores]
                 if not self.test:
