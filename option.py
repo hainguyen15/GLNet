@@ -25,11 +25,13 @@ class Options:
         parser.add_argument(
             "--model_path",
             type=str,
+            default='./checkpoints',
             help="path to store trained model files, no need to include task specific name",
         )
         parser.add_argument(
             "--log_path",
             type=str,
+            default='./logs',
             help="path to store tensorboard log files, no need to include task specific name",
         )
         parser.add_argument(

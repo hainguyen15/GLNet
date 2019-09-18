@@ -1,15 +1,16 @@
 export CUDA_VISIBLE_DEVICES=0
 python train_deep_globe.py \
 --n_class 7 \
---data_path "/ssd1/chenwy/deep_globe/data/" \
---model_path "/home/chenwy/deep_globe/FPN_based/github/saved_models/" \
---log_path "/home/chenwy/deep_globe/FPN_based/github/runs/" \
+--data_path "../../datasets/deep-globe/" \
+--model_path "../../checkpoints" \
+--log_path "../../logs" \
 --task_name "fpn_global.508_4.28.2019_lr2e5" \
 --mode 1 \
---batch_size 6 \
---sub_batch_size 6 \
+--batch_size 8 \
+--sub_batch_size 8 \
 --size_g 508 \
 --size_p 508 \
+--evaluation \
 --path_g "fpn_global.resize512_9.2.2018.2.global.pth" \
 --path_g2l "fpn_global2local.508.deep.cat.1x_ensemble_fmreg.p3_10.14.2018.lr2e5.pth" \
 --path_l2g "fpn_local2global.508_deep.cat_ensemble.p3_10.31.2018.lr2e5.local1x.epoch13.pth" \

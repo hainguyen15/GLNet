@@ -133,8 +133,8 @@ scheduler = LR_Scheduler("poly", learning_rate, num_epochs, len(dataloader_train
 criterion1 = FocalLoss(gamma=3)
 criterion2 = nn.CrossEntropyLoss()
 criterion3 = lovasz_softmax
-criterion = lambda x, y: criterion1(x, y)
-# criterion = lambda x,y: 0.5*criterion1(x, y) + 0.5*criterion3(x, y)
+criterion = criterion1
+# criterion = lambda x, y: 0.5*criterion1(x, y) + 0.5*criterion3(x, y)
 mse = nn.MSELoss()
 
 if not evaluation:
@@ -382,4 +382,3 @@ for epoch in range(num_epochs):
 
 if not evaluation:
     f_log.close()
-
