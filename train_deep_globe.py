@@ -67,7 +67,7 @@ ids_val = [
 ]
 ids_test = [
     image_name
-    for image_name in os.listdir(os.path.join(data_path, "offical_crossvali", "Sat"))
+    for image_name in os.listdir(os.path.join(data_path, "official_crossvali", "Sat"))
     if is_image_file(image_name)
 ]
 
