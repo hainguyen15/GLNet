@@ -78,7 +78,7 @@ dataset_train = DeepGlobe(
 dataloader_train = torch.utils.data.DataLoader(
     dataset=dataset_train,
     batch_size=batch_size,
-    num_workers=10,
+    num_workers=args.num_workers,
     collate_fn=collate,
     shuffle=True,
     pin_memory=True,
@@ -87,7 +87,7 @@ dataset_val = DeepGlobe(os.path.join(data_path, "crossvali"), ids_val, label=Tru
 dataloader_val = torch.utils.data.DataLoader(
     dataset=dataset_val,
     batch_size=batch_size,
-    num_workers=10,
+    num_workers=args.num_workers,
     collate_fn=collate,
     shuffle=False,
     pin_memory=True,
@@ -98,18 +98,18 @@ dataset_test = DeepGlobe(
 dataloader_test = torch.utils.data.DataLoader(
     dataset=dataset_test,
     batch_size=batch_size,
-    num_workers=10,
+    num_workers=args.num_workers,
     collate_fn=collate_test,
     shuffle=False,
     pin_memory=True,
 )
 
-##### sizes are (w, h) ##############################
+##### sizes are (w, h) #####
 # make sure margin / 32 is over 1.5 AND size_g is divisible by 4
 size_g = (args.size_g, args.size_g)  # resized global image
 size_p = (args.size_p, args.size_p)  # cropped local patch size
 sub_batch_size = args.sub_batch_size  # batch size for train local patches
-###################################
+
 print("creating models......")
 
 path_g = os.path.join(model_path, args.path_g)
@@ -120,7 +120,6 @@ model, global_fixed = create_model_load_weights(
     n_class, mode, evaluation, path_g=path_g, path_g2l=path_g2l, path_l2g=path_l2g
 )
 
-###################################
 num_epochs = args.num_epochs
 learning_rate = args.lr
 lamb_fmreg = args.lamb_fmreg
@@ -128,7 +127,6 @@ lamb_fmreg = args.lamb_fmreg
 optimizer = get_optimizer(model, mode, learning_rate=learning_rate)
 
 scheduler = LR_Scheduler("poly", learning_rate, num_epochs, len(dataloader_train))
-##################################
 
 criterion1 = FocalLoss(gamma=3)
 criterion2 = nn.CrossEntropyLoss()

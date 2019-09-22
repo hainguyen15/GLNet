@@ -4,7 +4,7 @@ python train_deep_globe.py \
 --data_path "../../datasets/deep-globe/" \
 --model_path "../../checkpoints" \
 --log_path "../../logs" \
---task_name "fpn_global.508_4.28.2019_lr2e5" \
+--task_name "fpn_global.508_lr2e5" \
 --mode 1 \
 --batch_size 8 \
 --sub_batch_size 8 \

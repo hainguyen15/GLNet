@@ -793,7 +793,7 @@ class fpn(nn.Module):
         if mode == 1:
             # train global model
             c2_g, c3_g, c4_g, c5_g = self.resnet_global.forward(image_global)
-            output_g, ps0_g, ps1_g, ps2_g, ps3_g = self.fpn_global.forward(
+            output_g, _, _, _, _ = self.fpn_global.forward(
                 c2_g, c3_g, c4_g, c5_g
             )
             # imsize = image_global.size()[2:]

@@ -68,11 +68,8 @@ class FocalLoss(nn.Module):
         # print(batch_loss)
 
         if self.size_average:
-            loss = batch_loss.mean()
-        else:
-            loss = batch_loss.sum()
-        return loss
-
+            return batch_loss.mean()
+        return batch_loss.sum()
 
 class SoftCrossEntropyLoss2d(nn.Module):
     def __init__(self):
