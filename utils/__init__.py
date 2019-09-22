@@ -9,8 +9,6 @@ import zipfile
 import tarfile
 import numpy as np
 
-from .graph_serialize import save_graphs, load_graphs, load_labels
-
 try:
     import requests
 except ImportError:
