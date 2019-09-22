@@ -14,6 +14,7 @@ from PIL import Image
 
 from models.fpn_global_local_fmreg_ensemble import fpn
 from utils.metrics import ConfusionMatrix
+from dataset.deep_globe import RGB_mapping_to_class
 
 # torch.cuda.synchronize()
 # torch.backends.cudnn.benchmark = True
@@ -22,8 +23,8 @@ torch.backends.cudnn.deterministic = True
 transformer = transforms.Compose(
     [
         transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-        # transforms.Normalize([.485, .456, .406], [.229, .224, .225]),
+        # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        transforms.Normalize([.485, .456, .406], [.229, .224, .225]),
     ]
 )
 
@@ -39,13 +40,14 @@ def resize(images, shape, label=False):
             resized[i] = img.resize(shape, Image.NEAREST)
             # resized[i] = images[i].resize(shape, Image.BILINEAR)
         else:
-            resized[i] = img.resize(shape, Image.BILINEAR)
+            resized[i] = img.resize(shape, Image.BILINEAR).convert('RGB')
     return resized
 
 
 def _mask_transform(mask):
     target = np.array(mask).astype("int32")
-    target[target == 255] = -1
+    # target[target == 255] = -1
+    target[target == 0] = -1
     # target -= 1 # in DeepGlobe: make class 0 (should be ignored) as -1 (to be ignored in cross_entropy)
     return target
 
@@ -394,6 +396,10 @@ class Trainer(object):
 
     def train(self, sample, model, global_fixed):
         images, labels = sample["image"], sample["label"]  # PIL images
+        lbls = [RGB_mapping_to_class(np.array(label)) for label in labels]
+        labels = [Image.fromarray(lbl) for lbl in lbls]
+        del(lbls)
+
         labels_npy = masks_transform(
             labels, numpy=True
         )  # label of origin size in numpy
@@ -404,11 +410,11 @@ class Trainer(object):
             labels, (self.size_g[0] // 4, self.size_g[1] // 4), label=True
         )  # down 1/4 for loss
         # labels_glb = resize(labels, self.size_g, label=True) # must downsample image for reduced GPU memory
-        labels_glb = masks_transform(labels_glb)
+        labels_glb = masks_transform(labels_glb)  # 127 * 127 * 8 = 129032
 
         if self.mode == 2 or self.mode == 3:
-            # patches, coordinates, templates, sizes, ratios = global2patch(
-            patches, coordinates, _, sizes, ratios = global2patch(
+            patches, coordinates, templates, sizes, ratios = global2patch(
+            # patches, coordinates, _, sizes, ratios = global2patch(
                 images, self.size_p
             )
             label_patches, _, _, _, _ = global2patch(labels, self.size_p)
@@ -513,7 +519,7 @@ class Trainer(object):
                         [j, j + self.sub_batch_size],
                         len(images),
                         global_model=global_fixed,
-                        template=self.template,
+                        template=templates[0],
                         n_patch_all=len(coordinates[i]),
                     )
                     predicted_patches[i][j : j + output_patches.size()[0]] = (
@@ -705,8 +711,8 @@ class Evaluator(object):
 
                     if self.mode == 2 or self.mode == 3:
                         # patches = global2patch(images_local, self.n, self.step, self.size_p)
-                        # patches, coordinates, templates, sizes, ratios = global2patch(
-                        patches, coordinates, _, sizes, ratios = global2patch(
+                        patches, coordinates, templates, sizes, ratios = global2patch(
+                        # patches, coordinates, _, sizes, ratios = global2patch(
                             images, self.size_p
                         )
                         # predicted_patches = [ np.zeros((self.n**2, self.n_class, self.size_p[0], self.size_p[1])) for i in range(len(images)) ]
@@ -895,7 +901,7 @@ class Evaluator(object):
                                     [j, j + self.sub_batch_size],
                                     len(images),
                                     global_model=global_fixed,
-                                    template=self.template,
+                                    template=templates[0],
                                     n_patch_all=len(coordinates[i]),
                                 )
                                 predicted_patches[i][
@@ -925,7 +931,8 @@ class Evaluator(object):
                         # generate ensembles
                         for i in range(len(images)):
                             j = 0
-                            while j < self.n ** 2:
+                            # while j < self.n ** 2:
+                            while j < len(coordinates[i]):
                                 fl = fm_patches[i][j : j + self.sub_batch_size].cuda()
                                 # fg = model.module._crop_global(fm_global[i:i+1], self.coordinates[j:j+self.sub_batch_size], self.ratio)[0]
                                 fg = model.module._crop_global(
