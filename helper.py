@@ -47,7 +47,7 @@ def resize(images, shape, label=False):
 def _mask_transform(mask):
     target = np.array(mask).astype("int32")
     # target[target == 255] = -1
-    target[target == 0] = -1
+    # target[target == 0] = -1
     # target -= 1 # in DeepGlobe: make class 0 (should be ignored) as -1 (to be ignored in cross_entropy)
     return target
 
@@ -396,9 +396,9 @@ class Trainer(object):
 
     def train(self, sample, model, global_fixed):
         images, labels = sample["image"], sample["label"]  # PIL images
-        lbls = [RGB_mapping_to_class(np.array(label)) for label in labels]
-        labels = [Image.fromarray(lbl) for lbl in lbls]
-        del(lbls)
+        #lbls = [RGB_mapping_to_class(np.array(label)) for label in labels]
+        #labels = [Image.fromarray(lbl) for lbl in lbls]
+#        del(lbls)
 
         labels_npy = masks_transform(
             labels, numpy=True
@@ -660,6 +660,8 @@ class Evaluator(object):
             images = sample["image"]
             if not self.test:
                 labels = sample["label"]  # PIL images
+                #lbls = [RGB_mapping_to_class(np.array(label)) for label in labels]
+                #labels = [Image.fromarray(lbl) for lbl in lbls]
                 labels_npy = masks_transform(labels, numpy=True)
 
             images_global = resize(images, self.size_g)

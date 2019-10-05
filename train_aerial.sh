@@ -1,15 +1,15 @@
 export CUDA_VISIBLE_DEVICES=0,1
 python train_deep_globe.py \
---n_class 7 \
---data_path "../../datasets/deep-globe/" \
+--n_class 1 \
+--data_path "../../datasets/AerialImageDataset/" \
 --model_path "../saved_models/" \
 --log_path "../../logs/" \
 --task_name "test" \
 --mode 1 \
 --batch_size 32 \
 --sub_batch_size 32 \
---size_g 508 \
---size_p 508 \
+--size_g 800 \
+--size_p 800 \
 #--path_g "fpn_global.508_lr2e5.pth" \
 #--path_g2l "fpn_global2local.508.1x_ensemble_fmreg.lr2e5.pth" \
 #--path_l2g "fpn_local2global.508.1x_ensemble_fmreg.lr2e5.pth" \

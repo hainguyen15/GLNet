@@ -57,18 +57,18 @@ print("preparing datasets and dataloaders......")
 batch_size = args.batch_size
 ids_train = [
     image_name
-    for image_name in os.listdir(os.path.join(data_path, "train", "Sat"))
+    for image_name in os.listdir(os.path.join(data_path, "train", "images"))
     if is_image_file(image_name)
 ]
 # ids_train = [image_name for image_name in os.listdir(os.path.join(data_path, "train_test", "Sat")) if is_image_file(image_name)]
 ids_val = [
     image_name
-    for image_name in os.listdir(os.path.join(data_path, "crossvali", "Sat"))
+    for image_name in os.listdir(os.path.join(data_path, "test", "images"))
     if is_image_file(image_name)
 ]
 ids_test = [
     image_name
-    for image_name in os.listdir(os.path.join(data_path, "official_crossvali", "Sat"))
+    for image_name in os.listdir(os.path.join(data_path, "test", "images"))
     if is_image_file(image_name)
 ]
 
@@ -84,7 +84,7 @@ dataloader_train = torch.utils.data.DataLoader(
     shuffle=True,
     pin_memory=True,
 )
-dataset_val = DeepGlobe(os.path.join(data_path, "crossvali"), ids_val, label=True)
+dataset_val = DeepGlobe(os.path.join(data_path, "test"), ids_val, label=True)
 dataloader_val = torch.utils.data.DataLoader(
     dataset=dataset_val,
     batch_size=batch_size,
@@ -94,7 +94,7 @@ dataloader_val = torch.utils.data.DataLoader(
     pin_memory=True,
 )
 dataset_test = DeepGlobe(
-    os.path.join(data_path, "official_crossvali"), ids_test, label=False
+    os.path.join(data_path, "test"), ids_test, label=False
 )
 dataloader_test = torch.utils.data.DataLoader(
     dataset=dataset_test,
